@@ -1,0 +1,12 @@
+type Skater {
+  sub: String
+  name: String
+  email: String
+  phone_number: String
+  primary: String
+  dateAdded: String
+}
+
+type Query {
+  listSkaters: [Skater] @aws_auth(cognito_groups: ["adminGroup"])
+}

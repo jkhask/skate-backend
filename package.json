@@ -8,7 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "codegen": "cd graphql && amplify codegen",
+    "build-api-bundle": "cd api-bundle && tsc && cp package.json dist"
   },
   "devDependencies": {
     "@types/jest": "^29.5.5",
@@ -20,9 +22,9 @@
     "typescript": "~5.2.2"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.521.0",
     "@types/aws-lambda": "^8.10.133",
     "aws-cdk-lib": "2.101.1",
-    "aws-sdk": "^2.1548.0",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
   }
