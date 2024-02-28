@@ -4,6 +4,7 @@ type Skater {
   email: String
   phone_number: String
   primary: String
+  points: Int
   dateAdded: String
 }
 

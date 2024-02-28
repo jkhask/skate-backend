@@ -37,6 +37,7 @@ export const handler = async (
         email: { S: email },
         phone_number: { S: phone_number },
         primary: { S: primary },
+        points: { N: 0 },
         dateAdded: { S: new Date().toISOString() },
       },
     }

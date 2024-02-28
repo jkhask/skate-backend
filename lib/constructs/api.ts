@@ -3,6 +3,7 @@ import * as cognito from 'aws-cdk-lib/aws-cognito'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import { Construct } from 'constructs'
 import * as path from 'path'
+import { standardResolverJs } from '../util'
 
 export interface ApiProps {
   userPool: cognito.UserPool
@@ -32,16 +33,18 @@ export class Api extends Construct {
     })
     this.api = api
 
+    const usersTableDataSource = api.addDynamoDbDataSource(
+      'usersTableDataSource',
+      usersTable
+    )
+
     const listSkatersFunc = new appsync.AppsyncFunction(
       scope,
       'listSkatersFunc',
       {
         name: 'listSkatersFunc',
         api,
-        dataSource: api.addDynamoDbDataSource(
-          'usersTableDatasource',
-          usersTable
-        ),
+        dataSource: usersTableDataSource,
         code: appsync.Code.fromInline(`
             export function request(ctx) {
             return { operation: 'Scan' };
@@ -59,15 +62,7 @@ export class Api extends Construct {
       api,
       typeName: 'Query',
       fieldName: 'listSkaters',
-      code: appsync.Code.fromInline(`
-            export function request(ctx) {
-            return {};
-            }
-  
-            export function response(ctx) {
-            return ctx.prev.result;
-            }
-    `),
+      code: appsync.Code.fromInline(standardResolverJs),
       runtime: appsync.FunctionRuntime.JS_1_0_0,
       pipelineConfig: [listSkatersFunc],
     })

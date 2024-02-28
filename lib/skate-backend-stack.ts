@@ -23,7 +23,10 @@ export class SkateBackendStack extends cdk.Stack {
     })
     usersTable.grantFullAccess(postSignUpFn)
 
+    // Auth
     const { userPool } = new Cognito(this, 'cognito', { postSignUpFn })
+
+    // API
     new Api(this, 'api', { userPool, usersTable })
   }
 }
