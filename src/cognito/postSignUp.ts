@@ -1,4 +1,5 @@
-import { DynamoDB, PutItemInput } from '@aws-sdk/client-dynamodb'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
 
 interface CognitoEvent {
   request: {
@@ -12,7 +13,8 @@ interface CognitoEvent {
   }
 }
 
-const client = new DynamoDB()
+const client = new DynamoDBClient()
+const docClient = DynamoDBDocumentClient.from(client)
 
 export const handler = async (
   event: CognitoEvent,
@@ -29,21 +31,21 @@ export const handler = async (
       'custom:primary': primary,
     } = userAttributes
 
-    const params: PutItemInput = {
+    const command = new PutCommand({
       TableName: process.env.SKATERS_TABLE!,
       Item: {
-        sub: { S: sub },
-        name: { S: name },
-        email: { S: email },
-        phone_number: { S: phone_number },
-        primary: { S: primary },
-        points: { N: 0 },
-        dateAdded: { S: new Date().toISOString() },
+        sub,
+        name,
+        email,
+        phone_number,
+        primary,
+        points: 0,
+        dateAdded: new Date().toISOString(),
       },
-    }
+    })
 
-    // Put user information into DynamoDB
-    await client.putItem(params)
+    const resp = await docClient.send(command)
+    console.log(resp)
 
     return {
       statusCode: 200,
