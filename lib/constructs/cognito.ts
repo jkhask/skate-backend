@@ -5,19 +5,24 @@ import { Construct } from 'constructs'
 
 export interface CognitoProps {
   postSignUpFn?: nodejs.NodejsFunction
+  appName: string
 }
 
 export class Cognito extends Construct {
   userPool: cognito.UserPool
 
-  constructor(scope: Construct, id: string, { postSignUpFn }: CognitoProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    { postSignUpFn, appName }: CognitoProps
+  ) {
     super(scope, id)
 
-    const userPool = new cognito.UserPool(scope, 'skateUserPool', {
-      userPoolName: 'skaters',
+    const userPool = new cognito.UserPool(scope, `${id}UserPool`, {
+      userPoolName: `${id}UserPool`,
       signInCaseSensitive: false,
       userVerification: {
-        emailSubject: 'Your verification link for CLTFreeSkate',
+        emailSubject: `Your verification link for ${appName}`,
         emailBody:
           'Please click the link to verify your email address. {##Verify Email##}',
         emailStyle: cognito.VerificationEmailStyle.LINK,
@@ -51,24 +56,24 @@ export class Cognito extends Construct {
     this.userPool = userPool
 
     // group for admins
-    new cognito.CfnUserPoolGroup(this, 'adminGroup', {
+    new cognito.CfnUserPoolGroup(scope, 'adminGroup', {
       groupName: 'adminGroup',
       userPoolId: userPool.userPoolId,
     })
 
     new cognito.UserPoolDomain(scope, 'userPoolDomain', {
       userPool,
-      cognitoDomain: { domainPrefix: 'cltfreeskate' },
+      cognitoDomain: { domainPrefix: appName.toLowerCase() },
     })
 
-    const userPoolClient = new cognito.UserPoolClient(scope, 'skateClient', {
+    const userPoolClient = new cognito.UserPoolClient(scope, `${id}Client`, {
       userPool,
       generateSecret: false, // Don't need to generate secret for web app running on browsers
     })
 
     const identityPool = new cognito.CfnIdentityPool(
       scope,
-      'skateIdentityPool',
+      `${id}IdentityPool`,
       {
         allowUnauthenticatedIdentities: false, // Don't allow unathenticated users
         cognitoIdentityProviders: [
@@ -113,25 +118,21 @@ export class Cognito extends Construct {
     )
 
     //Attach authenticated and unauthenticated roles to identity pool
-    const defaultPolicy = new cognito.CfnIdentityPoolRoleAttachment(
-      scope,
-      'DefaultValidRole',
-      {
-        identityPoolId: identityPool.ref,
-        roles: {
-          authenticated: authenticatedRole.roleArn,
-        },
-      }
-    )
+    new cognito.CfnIdentityPoolRoleAttachment(scope, 'DefaultValidRole', {
+      identityPoolId: identityPool.ref,
+      roles: {
+        authenticated: authenticatedRole.roleArn,
+      },
+    })
 
     // Export values
-    new cdk.CfnOutput(this, 'UserPoolId', {
+    new cdk.CfnOutput(scope, 'UserPoolId', {
       value: userPool.userPoolId,
     })
-    new cdk.CfnOutput(this, 'UserPoolClientId', {
+    new cdk.CfnOutput(scope, 'UserPoolClientId', {
       value: userPoolClient.userPoolClientId,
     })
-    new cdk.CfnOutput(this, 'IdentityPoolId', {
+    new cdk.CfnOutput(scope, 'IdentityPoolId', {
       value: identityPool.ref,
     })
   }

@@ -8,9 +8,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk",
-    "codegen": "cd graphql && amplify codegen",
-    "build-api-bundle": "cd api-bundle && tsc && cp package.json dist"
+    "cdk": "cdk"
   },
   "devDependencies": {
     "@types/jest": "^29.5.5",
