@@ -34,6 +34,6 @@ export class SkateBackendStack extends cdk.Stack {
 
     // API
     const skateApi = new Api(this, 'skateApi', { userPool })
-    skateApi.addResolversForTable(this, usersTable, usersResolvers)
+    skateApi.addResolversForTable(this, usersTable, 'skaters', usersResolvers)
   }
 }

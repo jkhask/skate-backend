@@ -7,7 +7,6 @@ import * as path from 'path'
 export interface ResolverConfig {
   typeName: string
   fieldName: string
-  dataSourcePrefix: string
   code: appsync.Code
 }
 
@@ -38,16 +37,18 @@ export class Api extends Construct {
   addResolversForTable(
     scope: Construct,
     table: dynamodb.TableV2,
+    dataSourcePrefix: string,
     resolverConfigs: ResolverConfig[]
   ) {
+    const dataSource = this.api.addDynamoDbDataSource(
+      `${dataSourcePrefix}DataSource`,
+      table
+    )
     resolverConfigs.forEach(config => {
-      const { typeName, fieldName, code, dataSourcePrefix } = config
+      const { typeName, fieldName, code } = config
       new appsync.Resolver(scope, `${fieldName}Resolver`, {
         api: this.api,
-        dataSource: this.api.addDynamoDbDataSource(
-          `${dataSourcePrefix}DataSource`,
-          table
-        ),
+        dataSource,
         runtime: appsync.FunctionRuntime.JS_1_0_0,
         typeName,
         fieldName,

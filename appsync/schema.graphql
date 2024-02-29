@@ -11,3 +11,15 @@ type Skater {
 type Query {
   listSkaters: [Skater] @aws_auth(cognito_groups: ["adminGroup"])
 }
+
+type Mutation {
+  updateSkater(
+    sub: String!
+    name: String
+    email: String
+    phone_number: String
+    primary: String
+    points: Int
+    dateAdded: String
+  ): Skater @aws_auth(cognito_groups: ["adminGroup"])
+}
