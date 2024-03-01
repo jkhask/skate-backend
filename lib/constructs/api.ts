@@ -2,29 +2,31 @@ import * as appsync from 'aws-cdk-lib/aws-appsync'
 import * as cognito from 'aws-cdk-lib/aws-cognito'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import { Construct } from 'constructs'
-import * as path from 'path'
 
 export interface ResolverConfig {
   typeName: string
   fieldName: string
-  code: appsync.Code
+  codePath: string
 }
 
 export interface ApiProps {
   userPool: cognito.UserPool
+  schemaPath: string
 }
 
 export class Api extends Construct {
   api: appsync.GraphqlApi
 
-  constructor(scope: Construct, id: string, { userPool }: ApiProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    { userPool, schemaPath }: ApiProps
+  ) {
     super(scope, id)
 
     this.api = new appsync.GraphqlApi(scope, `${id}Graphql`, {
       name: id,
-      definition: appsync.Definition.fromFile(
-        path.join(__dirname, '../../appsync/schema.graphql')
-      ),
+      definition: appsync.Definition.fromFile(schemaPath),
       authorizationConfig: {
         defaultAuthorization: {
           authorizationType: appsync.AuthorizationType.USER_POOL,
@@ -45,14 +47,14 @@ export class Api extends Construct {
       table
     )
     resolverConfigs.forEach(config => {
-      const { typeName, fieldName, code } = config
+      const { typeName, fieldName, codePath } = config
       new appsync.Resolver(scope, `${fieldName}Resolver`, {
         api: this.api,
         dataSource,
         runtime: appsync.FunctionRuntime.JS_1_0_0,
         typeName,
         fieldName,
-        code,
+        code: appsync.Code.fromAsset(codePath),
       })
     })
   }
