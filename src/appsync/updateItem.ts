@@ -4,9 +4,9 @@ import * as ddb from '@aws-appsync/utils/dynamodb'
 export const request = (ctx: Context) => {
   const { sub, ...rest } = ctx.args
   const values = Object.entries(rest).reduce((obj, [key, value]) => {
-    obj[key] = value ?? ddb.operations.remove()
+    obj[key as typeof rest] = value ?? ddb.operations.remove()
     return obj
-  }, {} as any)
+  }, {} as never)
 
   return ddb.update({
     key: { sub },
