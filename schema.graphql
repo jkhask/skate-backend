@@ -20,6 +20,5 @@ type Mutation {
     phone_number: String
     primary: String
     points: Int
-    dateAdded: String
   ): Skater @aws_auth(cognito_groups: ["adminGroup"])
 }
